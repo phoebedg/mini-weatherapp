@@ -7,7 +7,9 @@ function createGallery(imgData) {
   console.log(imgData.results);
   const thumbs = imgData.results
     .map(function(pic) {
-      return `<img src=${pic.urls.thumb}>`;
+      return `<a href="${
+        pic.urls.full
+      }" class="thumbs__link"><img class="thumbs__link__img" id="thumb" src=${pic.urls.thumb}></a>`;
     })
     .join("");
   thumbnails.innerHTML = thumbs;
@@ -15,7 +17,7 @@ function createGallery(imgData) {
 
 function createMainImg(imgData) {
   const img = imgData.results[0].urls.full;
-  mainPhoto.innerHTML = `<img src =${img}>`;
+  mainPhoto.innerHTML = `<img id="mainImg" src =${img}>`;
   // const remainingImgs = imgData.results.shift();
 }
 
@@ -63,4 +65,12 @@ function submitForm(event) {
   );
 }
 
+function swapImage(event) {
+  event.preventDefault();
+  // console.log("E.targ:", event.target);
+  mainPhoto.innerHTML = `<img src="${event.target.href}">`;
+  // console.log("mainPhoto.innerHTML:", mainPhoto.innerHTML);
+}
+
 form.addEventListener("submit", submitForm);
+thumbnails.addEventListener("click", swapImage);
