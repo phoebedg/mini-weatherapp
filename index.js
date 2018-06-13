@@ -1,24 +1,29 @@
 const form = document.querySelector("#search");
 const input = document.querySelector("#search-tf");
 const mainPhoto = document.querySelector("#photo");
-const thumbnails = document.querySelector("#thumbs");
+const thumbs = document.querySelector("#thumbs");
+const info = document.querySelector("#info");
 
 function createGallery(imgData) {
-  console.log(imgData.results);
-  const thumbs = imgData.results
+  thumbs.innerHTML = imgData.results
     .map(function(pic) {
-      return `<a href="${
-        pic.urls.full
-      }" class="thumbs__link"><img class="thumbs__link__img" id="thumb" src=${pic.urls.thumb}></a>`;
+      return `
+        <a class="thumbs__link"
+          href="${pic.urls.regular}" 
+          data-image="${pic.urls.full}" 
+          data-creator="${pic.user.name}" 
+          data-creator-website="${pic.user.links.html}"
+          data-bgcolor="${pic.color}">
+          <img class="thumbs__link__img" src="${pic.urls.thumb}">
+        </a>`;
     })
     .join("");
-  thumbnails.innerHTML = thumbs;
 }
 
 function createMainImg(imgData) {
-  const img = imgData.results[0].urls.full;
+  const img = imgData.results[0].urls.regular;
   mainPhoto.innerHTML = `<img id="mainImg" src =${img}>`;
-  // const remainingImgs = imgData.results.shift();
+  document.body.style.backgroundColor = `${imgData.results[0].color}`;
 }
 
 function getImage(weather) {
@@ -29,7 +34,6 @@ function getImage(weather) {
       return response.json();
     })
     .then(function(imgData) {
-      // console.log("imgData:", imgData);
       createMainImg(imgData);
       createGallery(imgData);
     })
@@ -39,19 +43,15 @@ function getImage(weather) {
 }
 
 function getWeather(url) {
+  function getDescription(data) {
+    return data.weather[0].description;
+  }
   fetch(url)
     .then(function(response) {
       return response.json();
     })
-    .then(function(data) {
-      // console.log("weatherData:", data);
-      const weather = data.weather[0].description;
-      // console.log("weather:", weather);
-      return weather;
-    })
-    .then(function(weather) {
-      getImage(weather);
-    })
+    .then(getDescription)
+    .then(getImage)
     .catch(function(error) {
       alert("Don't worry about the weather");
     });
@@ -67,10 +67,18 @@ function submitForm(event) {
 
 function swapImage(event) {
   event.preventDefault();
-  // console.log("E.targ:", event.target);
-  mainPhoto.innerHTML = `<img src="${event.target.href}">`;
-  // console.log("mainPhoto.innerHTML:", mainPhoto.innerHTML);
+  mainPhoto.innerHTML = `<img src="${event.target.dataset.image}">`;
+  info.innerHTML = `
+  <a href="${event.target.dataset.creatorWebsite}"
+  target="_blank" 
+  id="credit-user">${event.target.dataset.creator}
+  </a>
+  <span>on</span>
+  <a href="#" 
+  id="credit-platform">Unsplash
+  </a>`;
+  document.body.style.backgroundColor = `${event.target.dataset.bgcolor}`;
 }
 
 form.addEventListener("submit", submitForm);
-thumbnails.addEventListener("click", swapImage);
+thumbs.addEventListener("click", swapImage);
